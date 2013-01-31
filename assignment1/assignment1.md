@@ -9,7 +9,7 @@ Assignment1
 
 ### Q1
 
-> The first term is "but", it appears "1" time.
+> The first term is "''but", it appears "1" time.
 ### Q2
 
 > The third to last term is "zorah", it appears "8" times.
