@@ -25,3 +25,10 @@ Assignment1
 ### Q6
 
 > There are "31940" unique words.
+
+Grading
+=======
+
+Your answers are correct. However, I encountered a script permission issue, but everything worked fine after I fixed it. Please be careful next time.
+
+-Jimmy
