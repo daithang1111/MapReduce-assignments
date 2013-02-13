@@ -23,7 +23,8 @@
   <path id="libjars.path.id">
     <fileset dir="${lib.dir}/" includes="cloud9*.jar"/>
     <fileset dir="${lib.dir}/" includes="guava*.jar"/>
-  </path>
+    <fileset dir="${lib.dir}/" includes="fastutil*.jar"/>  
+</path>
 
   <property name="ivy.install.version" value="2.2.0"/>
   <property name="ivy.jar.dir" value="${basedir}/ivy"/>
