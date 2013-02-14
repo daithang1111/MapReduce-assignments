@@ -18,14 +18,17 @@ Assignment2
 > The total running time for "pairs" implementation is 480s.
 
 > The total running time for "stripes" implementation is 230s. 
+
 ### Q2
 
 > The total running time for "pairs" implementation without combiners is 512s.
 
 > The total running time for "stripes" implementation without combiners is 240s.
+
 ### Q3
 
 > Both implementations extract the same number of pairs PMI = 233518.
+
 ### Q4
 
 > The pairs with max PMI is (with, &c), value = 10.27544. 
