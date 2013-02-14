@@ -27,7 +27,7 @@ Assignment2
 
 ### Q3
 
-> Both implementations extract the same number of pairs PMI = 233518.
+> Both implementations extract the same number of pairs PMI = 233518 (unique pairs= being divided by 2, which is 116759).
 
 ### Q4
 
