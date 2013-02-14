@@ -13,22 +13,30 @@ Assignment2
 
 >For "tripes", similar to the approach I used for pairs, the only difference is that I used "stripes" strategy in which a mapper emits a word and all associative words with value of 1, regardless of order. For example, a sentence A B C, the mapper emits A->*:1,B:1,C:1.
 
-> The first term is "''but", it appears "1" time.
+### Q1
+
+> The total running time for "pairs" implementation is 480s.
+
+> The total running time for "stripes" implementation is 230s. 
 ### Q2
 
-> The third to last term is "zorah", it appears "8" times.
+> The total running time for "pairs" implementation without combiners is 512s.
+
+> The total running time for "stripes" implementation without combiners is 240s.
 ### Q3
 
-> There are "41788" unique words.
+> Both implementations extract the same number of pairs PMI = 233518.
 ### Q4
 
-> The first term is "aaron", it appears "416" times.
+> The pairs with max PMI is (with, &c), value = 10.27544. 
+
+> It seems obvious that "with" is a very popular prep. &c in the literature, especially those written by previous century authors, was used intensively like a replacement for "etc" or "so on". That is why this pair has high PMI value.
+
 ### Q5
 
-> The third to last term is "zorah", it appears "8" times.
-### Q6
+> Three words with highest PMI with "love" is ("hate", 2.57), ("hermia", 2.02), ("commandments", 1.94).
 
-> There are "31940" unique words.
+> Three words with highest PMI with "cloud" is ("tabernacle", 4.15), ("glory", 3.399), "fire", 3.235).
 
 Grading
 =======

@@ -48,10 +48,7 @@ public class PairsPMI extends Configured implements Tool {
       ArrayList<String> seenTokens = new ArrayList<String>();
       while (itr.hasMoreTokens()) {
         String cur = itr.nextToken();
-        if (seenTokens.size() == 0) {
-          seenTokens.add(cur);
-        } else {
-          if (seenTokens.size() > 0 && !seenTokens.contains(cur)) {
+        if (!seenTokens.contains(cur)) {
             for (int i = 0; i < seenTokens.size(); i++) {
               prev = seenTokens.get(i);
               BIGRAM.set(prev, cur);
@@ -60,7 +57,7 @@ public class PairsPMI extends Configured implements Tool {
               context.write(BIGRAM, ONE);
             }
             seenTokens.add(cur);
-          }
+     
         }
       }
       for (int i = 0; i < seenTokens.size(); i++) {
