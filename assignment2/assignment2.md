@@ -31,10 +31,9 @@ Assignment2
 
 ### Q4
 
-> The pairs with max PMI is (with, &c), value = 10.27544. 
+> The pairs with max PMI is (meshach, abednego), value = 9.3199. 
 
-> It seems obvious that "with" is a very popular prep. &c in the literature, especially those written by previous century authors, was used intensively like a replacement for "etc" or "so on". That is why this pair has high PMI value.
-
+> These are two people names who devoted to God in bible:)).
 ### Q5
 
 > Three words with highest PMI with "love" is ("hate", 2.57), ("hermia", 2.02), ("commandments", 1.94).
