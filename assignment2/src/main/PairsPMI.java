@@ -57,11 +57,10 @@ public class PairsPMI extends Configured implements Tool {
               context.write(BIGRAM, ONE);
             }
             seenTokens.add(cur);
-     
         }
       }
       for (int i = 0; i < seenTokens.size(); i++) {
-        BIGRAM.set(seenTokens.get(i), "*");
+        BIGRAM.set(seenTokens.get(i), "%");
         context.write(BIGRAM, ONE);
       }
     }
@@ -124,7 +123,7 @@ public class PairsPMI extends Configured implements Tool {
         sum += iter.next().get();
       }
 
-      if (key.getRightElement().equals("*")) {
+      if (key.getRightElement().equals("%")) {
         marginal = sum;
       } else {
         if (sum >= 10) {

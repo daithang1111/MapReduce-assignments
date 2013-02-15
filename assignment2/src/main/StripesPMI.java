@@ -87,7 +87,7 @@ public class StripesPMI extends Configured implements Tool {
       for (int i = 0; i < seenTokens.size(); i++) {
         cur = seenTokens.get(i);
         MAP.clear();
-        MAP.put("*", 1);
+        MAP.put("%", 1);
         for (int j = 0; j < seenTokens.size(); j++) {
           if (j != i) {
             MAP.put(seenTokens.get(j), 1);
@@ -159,12 +159,12 @@ public class StripesPMI extends Configured implements Tool {
         map.plus(iter.next());
       }
 
-      marginal = (double) (map.getInt("*"));
+      marginal = (double) (map.getInt("%"));
 
       //
       Set<String> set = map.keySet();
       for (String s : set) {
-        if (!s.equals("*")) {
+        if (!s.equals("%")) {
           if (map.getInt(s) >= 10) {
             // write in order A,B
             TWOWORDS.set(key.toString(), s);

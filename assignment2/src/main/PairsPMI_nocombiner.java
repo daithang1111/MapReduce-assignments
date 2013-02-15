@@ -64,7 +64,7 @@ public class PairsPMI_nocombiner extends Configured implements Tool {
         }
       }
       for (int i = 0; i < seenTokens.size(); i++) {
-        BIGRAM.set(seenTokens.get(i), "*");
+        BIGRAM.set(seenTokens.get(i), "%");
         context.write(BIGRAM, ONE);
       }
     }
@@ -127,7 +127,7 @@ public class PairsPMI_nocombiner extends Configured implements Tool {
         sum += iter.next().get();
       }
 
-      if (key.getRightElement().equals("*")) {
+      if (key.getRightElement().equals("%")) {
         marginal = sum;
       } else {
         if (sum >= 10) {
