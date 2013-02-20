@@ -43,4 +43,10 @@ Assignment2
 Grading
 =======
 
+Everything looks great: the answers are correct, I was able to run
+your code without any problems. Great work!
+
+Score: 35/35
+
 -Jimmy
+
