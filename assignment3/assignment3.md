@@ -9,7 +9,7 @@ Assignment3
 
 ### Q0
 
->The index files in part-r-00000 has sizes: index: 3280, and data: 6594167 (bytes)
+> The index files in part-r-00000 has sizes: index: 3280, and data: 6594167 (bytes)
 
 Grading
 =======
