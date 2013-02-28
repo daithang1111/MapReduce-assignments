@@ -46,8 +46,6 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
 
-import edu.umd.cloud9.io.array.ArrayListWritable;
-import edu.umd.cloud9.io.pair.PairOfInts;
 import edu.umd.cloud9.io.pair.PairOfStringInt;
 import edu.umd.cloud9.util.fd.Object2IntFrequencyDistribution;
 import edu.umd.cloud9.util.fd.Object2IntFrequencyDistributionEntry;
@@ -91,6 +89,13 @@ public class BuildInvertedIndexCompressed extends Configured implements Tool {
         KEY.set(e.getLeftElement(), (int) docno.get());
         VALUE.set(e.getRightElement());
         context.write(KEY, VALUE);
+
+        // emit additional value to count df
+        KEY.set(e.getLeftElement(), -1);// this can be 0, but i'm not sure so
+                                        // MIN_VALUE is best
+        VALUE.set(1);
+        context.write(KEY, VALUE);
+
       }
     }
   }
@@ -101,12 +106,14 @@ public class BuildInvertedIndexCompressed extends Configured implements Tool {
    * 
    */
   private static class MyReducer extends Reducer<PairOfStringInt, IntWritable, Text, BytesWritable> {
-    private final static IntWritable DF = new IntWritable();
+    // private final static IntWritable DF = new IntWritable();
     private final static IntWritable prevDocNo = new IntWritable();
     private final static Text PREV = new Text();
     private final static ByteArrayOutputStream baos = new ByteArrayOutputStream();
     private final static DataOutputStream dos = new DataOutputStream(baos);
-    private final static ArrayListWritable<PairOfInts> POSTINGs = new ArrayListWritable<PairOfInts>();
+
+    // private final static ArrayListWritable<PairOfInts> POSTINGs = new
+    // ArrayListWritable<PairOfInts>();
 
     /**
      * reduce
@@ -115,36 +122,33 @@ public class BuildInvertedIndexCompressed extends Configured implements Tool {
     public void reduce(PairOfStringInt key, Iterable<IntWritable> values, Context context)
         throws IOException, InterruptedException {
 
+      int val = key.getRightElement();
       String t = key.getLeftElement();
       if ((PREV.getLength() > 0) && (!t.equals(PREV.toString()))) {
-
-        WritableUtils.writeVInt(dos, DF.get());
-        for (PairOfInts poi : POSTINGs) {
-          WritableUtils.writeVInt(dos, poi.getLeftElement());
-          WritableUtils.writeVInt(dos, poi.getRightElement());
-
-        }
         context.write(PREV, new BytesWritable(baos.toByteArray()));
         dos.flush();
         baos.reset();
-
-        POSTINGs.clear();
-        DF.set(0);
         prevDocNo.set(0);//
       }
 
       Iterator<IntWritable> iter = values.iterator();
 
-      int df = 0;
-      while (iter.hasNext()) {
-        POSTINGs.add(new PairOfInts(key.getRightElement() - prevDocNo.get(), iter.next().get()));
-        prevDocNo.set(key.getRightElement());
-        df++;
+      if (val == -1) {
+        int df = 0;
+        while (iter.hasNext()) {
+          df += iter.next().get();
+        }
+        WritableUtils.writeVInt(dos, df);
+      } else {
+        // do normal thing
+
+        while (iter.hasNext()) {
+          WritableUtils.writeVInt(dos, key.getRightElement() - prevDocNo.get());
+          WritableUtils.writeVInt(dos, iter.next().get());
+          prevDocNo.set(key.getRightElement());
+        }
       }
-
       PREV.set(t);
-
-      DF.set(DF.get() + df);
     }
 
     /**
@@ -152,11 +156,6 @@ public class BuildInvertedIndexCompressed extends Configured implements Tool {
      */
     @Override
     public void cleanup(Context context) throws IOException, InterruptedException {
-      WritableUtils.writeVInt(dos, DF.get());
-      for (PairOfInts poi : POSTINGs) {
-        WritableUtils.writeVInt(dos, poi.getLeftElement());
-        WritableUtils.writeVInt(dos, poi.getRightElement());
-      }
       context.write(PREV, new BytesWritable(baos.toByteArray()));
       baos.reset();
       dos.close();
