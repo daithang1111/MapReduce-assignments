@@ -14,7 +14,6 @@
  * permissions and limitations under the License.
  */
 
-
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -42,6 +41,7 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
 
+import edu.umd.cloud9.io.array.ArrayListOfFloatsWritable;
 import edu.umd.cloud9.io.array.ArrayListOfIntsWritable;
 
 /**
@@ -49,29 +49,50 @@ import edu.umd.cloud9.io.array.ArrayListOfIntsWritable;
  * Driver program that takes a plain-text encoding of a directed graph and builds corresponding
  * Hadoop structures for representing the graph.
  * </p>
- *
+ * 
  * @author Jimmy Lin
  * @author Michael Schatz
  */
-public class BuildPersonalizedPageRankRecords_VERSION1 extends Configured implements Tool {
-  private static final Logger LOG = Logger.getLogger(BuildPersonalizedPageRankRecords_VERSION1.class);
+public class BuildPersonalizedPageRankRecords extends Configured implements Tool {
+  private static final Logger LOG = Logger.getLogger(BuildPersonalizedPageRankRecords.class);
 
   private static final String NODE_CNT_FIELD = "node.cnt";
-  private static final String SINGLE_SOURCE="single.source";
+  private static final String MULTI_SOURCES = "multiple.source";
 
   private static class MyMapper extends Mapper<LongWritable, Text, IntWritable, PageRankNode> {
     private static final IntWritable nid = new IntWritable();
     private static final PageRankNode node = new PageRankNode();
-    private static final IntWritable singleSource= new IntWritable();
+    private static int[] multiSources = null;
+    private static int sourcesize = 0;
+
+    // private static final ArrayListOfFloatsWritable afw = new ArrayListOfFloatsWritable();
+
+    // private static int sourcesize=0;
     @Override
     public void setup(Mapper<LongWritable, Text, IntWritable, PageRankNode>.Context context) {
       int n = context.getConfiguration().getInt(NODE_CNT_FIELD, 0);
-      singleSource.set(context.getConfiguration().getInt(SINGLE_SOURCE,0));
       if (n == 0) {
         throw new RuntimeException(NODE_CNT_FIELD + " cannot be 0!");
       }
+
+      // get input sources
+      // I think hadoop already configs this to be comma separated
+      String inputSources[] = context.getConfiguration().getStrings(MULTI_SOURCES);
+      sourcesize = inputSources.length;
+      multiSources = new int[sourcesize];
+      for (int i = 0; i < sourcesize; i++) {
+        multiSources[i] = Integer.parseInt(inputSources[i]);
+        // afw.add(Float.NEGATIVE_INFINITY);//init this
+      }
+      //
+      // node=new PageRankNode(sourcesize);//need to reinit
       node.setType(PageRankNode.Type.Complete);
-//      node.setPageRank((float) -StrictMath.log(n));
+
+      // float prValues[] =new float[inputSources.length];
+      // for(int i=0;i<inputSources.length;i++){
+      // prValues=
+      // }
+      // node.setPageRank((float) -StrictMath.log(n));
     }
 
     @Override
@@ -80,13 +101,27 @@ public class BuildPersonalizedPageRankRecords_VERSION1 extends Configured implem
       String[] arr = t.toString().trim().split("\\s+");
 
       nid.set(Integer.parseInt(arr[0]));
-      
-      //set initial pagerank
-      if(singleSource.get()==Integer.parseInt(arr[0])){
-        node.setPageRank((float)0.0f);
-      }else{
-        node.setPageRank(Float.NEGATIVE_INFINITY);
+
+      // set initial pagerank
+
+      // afw.clear();
+      ArrayListOfFloatsWritable afw = new ArrayListOfFloatsWritable();
+      for (int i = 0; i < sourcesize; i++) {
+        float tmp = Float.NEGATIVE_INFINITY;
+        if (multiSources[i] == Integer.parseInt(arr[0])) {
+          tmp = (float) 0.0f;
+        }
+        afw.add(tmp);
       }
+
+      node.setPageRank(afw);
+      //
+      //
+      // if (singleSource.get() == Integer.parseInt(arr[0])) {
+      // node.setPageRank((float) 0.0f);
+      // } else {
+      // node.setPageRank(Float.NEGATIVE_INFINITY);
+      // }
       //
       if (arr.length == 1) {
         node.setNodeId(Integer.parseInt(arr[0]));
@@ -114,13 +149,14 @@ public class BuildPersonalizedPageRankRecords_VERSION1 extends Configured implem
     }
   }
 
-  public BuildPersonalizedPageRankRecords_VERSION1() {}
+  public BuildPersonalizedPageRankRecords() {
+  }
 
   private static final String INPUT = "input";
   private static final String OUTPUT = "output";
   private static final String NUM_NODES = "numNodes";
   //
-  private static final String SOURCES ="sources";
+  private static final String SOURCES = "sources";
 
   /**
    * Runs this tool.
@@ -129,12 +165,12 @@ public class BuildPersonalizedPageRankRecords_VERSION1 extends Configured implem
   public int run(String[] args) throws Exception {
     Options options = new Options();
 
-    options.addOption(OptionBuilder.withArgName("path").hasArg()
-        .withDescription("input path").create(INPUT));
-    options.addOption(OptionBuilder.withArgName("path").hasArg()
-        .withDescription("output path").create(OUTPUT));
-    options.addOption(OptionBuilder.withArgName("num").hasArg()
-        .withDescription("number of nodes").create(NUM_NODES));
+    options.addOption(OptionBuilder.withArgName("path").hasArg().withDescription("input path")
+        .create(INPUT));
+    options.addOption(OptionBuilder.withArgName("path").hasArg().withDescription("output path")
+        .create(OUTPUT));
+    options.addOption(OptionBuilder.withArgName("num").hasArg().withDescription("number of nodes")
+        .create(NUM_NODES));
     options.addOption(OptionBuilder.withArgName("num").hasArg()
         .withDescription("number of sources").create(SOURCES));
 
@@ -148,7 +184,8 @@ public class BuildPersonalizedPageRankRecords_VERSION1 extends Configured implem
       return -1;
     }
 
-    if (!cmdline.hasOption(INPUT) || !cmdline.hasOption(OUTPUT) || !cmdline.hasOption(NUM_NODES)|| !cmdline.hasOption(SOURCES)) {
+    if (!cmdline.hasOption(INPUT) || !cmdline.hasOption(OUTPUT) || !cmdline.hasOption(NUM_NODES)
+        || !cmdline.hasOption(SOURCES)) {
       System.out.println("args: " + Arrays.toString(args));
       HelpFormatter formatter = new HelpFormatter();
       formatter.setWidth(120);
@@ -160,26 +197,27 @@ public class BuildPersonalizedPageRankRecords_VERSION1 extends Configured implem
     String inputPath = cmdline.getOptionValue(INPUT);
     String outputPath = cmdline.getOptionValue(OUTPUT);
     int n = Integer.parseInt(cmdline.getOptionValue(NUM_NODES));
-    String sources =cmdline.getOptionValue(SOURCES);
-    LOG.info("Tool name: " + BuildPersonalizedPageRankRecords_VERSION1.class.getSimpleName());
+    String sources = cmdline.getOptionValue(SOURCES);
+    LOG.info("Tool name: " + BuildPersonalizedPageRankRecords.class.getSimpleName());
     LOG.info(" - inputDir: " + inputPath);
     LOG.info(" - outputDir: " + outputPath);
     LOG.info(" - numNodes: " + n);
-    LOG.info(" - sources: "+sources);
+    LOG.info(" - sources: " + sources);
 
-    //let's try for the first sources
-    int singleSource =Integer.parseInt(sources.split(",")[0]);
+    // let's try for the first sources
+    // int singleSource =Integer.parseInt(sources.split(",")[0]);
     //
-    
+
     Configuration conf = getConf();
     conf.setInt(NODE_CNT_FIELD, n);
     //
-    conf.setInt(SINGLE_SOURCE,singleSource);
+    conf.setStrings(MULTI_SOURCES, sources);// set sources, keeping order
+    // conf.setInt(SINGLE_SOURCE,singleSource);
     conf.setInt("mapred.min.split.size", 1024 * 1024 * 1024);
 
     Job job = Job.getInstance(conf);
-    job.setJobName(BuildPersonalizedPageRankRecords_VERSION1.class.getSimpleName() + ":" + inputPath);
-    job.setJarByClass(BuildPersonalizedPageRankRecords_VERSION1.class);
+    job.setJobName(BuildPersonalizedPageRankRecords.class.getSimpleName() + ":" + inputPath);
+    job.setJarByClass(BuildPersonalizedPageRankRecords.class);
 
     job.setNumReduceTasks(0);
 
@@ -209,6 +247,6 @@ public class BuildPersonalizedPageRankRecords_VERSION1 extends Configured implem
    * Dispatches command-line arguments to the tool via the {@code ToolRunner}.
    */
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new BuildPersonalizedPageRankRecords_VERSION1(), args);
+    ToolRunner.run(new BuildPersonalizedPageRankRecords(), args);
   }
 }

@@ -14,7 +14,6 @@
  * permissions and limitations under the License.
  */
 
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
@@ -25,18 +24,19 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.Writable;
 
+import edu.umd.cloud9.io.array.ArrayListOfFloatsWritable;
 import edu.umd.cloud9.io.array.ArrayListOfIntsWritable;
 
 /**
- * Representation of a graph node for PageRank. 
- *
+ * Representation of a graph node for PageRank.
+ * 
  * @author Jimmy Lin
  * @author Michael Schatz
  */
 public class PageRankNode implements Writable {
   public static enum Type {
-    Complete((byte) 0),  // PageRank mass and adjacency list.
-    Mass((byte) 1),      // PageRank mass only.
+    Complete((byte) 0), // PageRank mass and adjacency list.
+    Mass((byte) 1), // PageRank mass only.
     Structure((byte) 2); // Adjacency list only.
 
     public byte val;
@@ -46,103 +46,107 @@ public class PageRankNode implements Writable {
     }
   };
 
-	private static final Type[] mapping = new Type[] { Type.Complete, Type.Mass, Type.Structure };
+  private static final Type[] mapping = new Type[] { Type.Complete, Type.Mass, Type.Structure };
 
-	private Type type;
-	private int nodeid;
-	private float pagerank;
-	private ArrayListOfIntsWritable adjacenyList;
+  // private int sourcesize; // number of sources
+  private Type type;
+  private int nodeid;
+  private ArrayListOfFloatsWritable pagerank;// we may have to write it as bytes
+  private ArrayListOfIntsWritable adjacenyList;
 
-	public PageRankNode() {}
+  public PageRankNode() {
+  }
 
-	public float getPageRank() {
-		return pagerank;
-	}
+  public ArrayListOfFloatsWritable getPageRank() {
+    return pagerank;
+  }
 
-	public void setPageRank(float p) {
-		this.pagerank = p;
-	}
+  public void setPageRank(ArrayListOfFloatsWritable p) {
+    this.pagerank = p;
+  }
 
-	public int getNodeId() {
-		return nodeid;
-	}
+  public int getNodeId() {
+    return nodeid;
+  }
 
-	public void setNodeId(int n) {
-		this.nodeid = n;
-	}
+  public void setNodeId(int n) {
+    this.nodeid = n;
+  }
 
-	public ArrayListOfIntsWritable getAdjacenyList() {
-		return adjacenyList;
-	}
+  public ArrayListOfIntsWritable getAdjacenyList() {
+    return adjacenyList;
+  }
 
-	public void setAdjacencyList(ArrayListOfIntsWritable list) {
-		this.adjacenyList = list;
-	}
+  public void setAdjacencyList(ArrayListOfIntsWritable list) {
+    this.adjacenyList = list;
+  }
 
-	public Type getType() {
-		return type;
-	}
+  public Type getType() {
+    return type;
+  }
 
-	public void setType(Type type) {
-		this.type = type;
-	}
+  public void setType(Type type) {
+    this.type = type;
+  }
 
-	/**
-	 * Deserializes this object.
-	 *
-	 * @param in source for raw byte representation
-	 */
-	@Override
-	public void readFields(DataInput in) throws IOException {
-		int b = in.readByte();
-		type = mapping[b];
-		nodeid = in.readInt();
+  /**
+   * Deserializes this object.
+   * 
+   * @param in source for raw byte representation
+   */
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    int b = in.readByte();
+    type = mapping[b];
+    nodeid = in.readInt();
 
-		if (type.equals(Type.Mass)) {
-			pagerank = in.readFloat();
-			return;
-		}
+    if (type.equals(Type.Mass)) {
+      //
+      pagerank = new ArrayListOfFloatsWritable();
+      pagerank.readFields(in);
+      return;
+    }
 
-		if (type.equals(Type.Complete)) {
-			pagerank = in.readFloat();
-		}
+    if (type.equals(Type.Complete)) {
+      pagerank = new ArrayListOfFloatsWritable();
+      pagerank.readFields(in);
+    }
 
-		adjacenyList = new ArrayListOfIntsWritable();
-		adjacenyList.readFields(in);
-	}
+    adjacenyList = new ArrayListOfIntsWritable();
+    adjacenyList.readFields(in);
+  }
 
-	/**
-	 * Serializes this object.
-	 *
-	 * @param out where to write the raw byte representation
-	 */
-	@Override
-	public void write(DataOutput out) throws IOException {
-		out.writeByte(type.val);
-		out.writeInt(nodeid);
+  /**
+   * Serializes this object.
+   * 
+   * @param out where to write the raw byte representation
+   */
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeByte(type.val);
+    out.writeInt(nodeid);
 
-		if (type.equals(Type.Mass)) {
-			out.writeFloat(pagerank);
-			return;
-		}
+    if (type.equals(Type.Mass)) {
+      pagerank.write(out);
+      return;
+    }
 
-		if (type.equals(Type.Complete)) {
-			out.writeFloat(pagerank);
-		}
+    if (type.equals(Type.Complete)) {
+      pagerank.write(out);
+    }
 
-		adjacenyList.write(out);
-	}
+    adjacenyList.write(out);
+  }
 
-	@Override
-	public String toString() {
-		return String.format("{%d %.4f %s}",
-				nodeid, pagerank, (adjacenyList == null ? "[]" : adjacenyList.toString(10)));
-	}
-
+  @Override
+  public String toString() {
+    return String.format("{%d %.4f %s}", nodeid, pagerank, (adjacenyList == null ? "[]"
+        : adjacenyList.toString(10)));
+  }
 
   /**
    * Returns the serialized representation of this object as a byte array.
-   *
+   * 
    * @return byte array representing the serialized representation of this object
    * @throws IOException
    */
@@ -156,7 +160,7 @@ public class PageRankNode implements Writable {
 
   /**
    * Creates object from a <code>DataInput</code>.
-   *
+   * 
    * @param in source for reading the serialized representation
    * @return newly-created object
    * @throws IOException
@@ -170,7 +174,7 @@ public class PageRankNode implements Writable {
 
   /**
    * Creates object from a byte array.
-   *
+   * 
    * @param bytes raw serialized representation
    * @return newly-created object
    * @throws IOException
