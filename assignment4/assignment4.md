@@ -61,5 +61,10 @@ Source: 9300650
 Grading
 =======
 
+Everything looks correct and I was able to run your code without any
+problems. Great work!
+
+Score: 35/35
 
 -Jimmy
+
