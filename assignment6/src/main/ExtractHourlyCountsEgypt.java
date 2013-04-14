@@ -137,7 +137,7 @@ public class ExtractHourlyCountsEgypt extends Configured implements Tool {
     // }
 
     String inputPath = "/user/shared/tweets2011/tweets2011.txt";// cmdline.getOptionValue(INPUT);
-    String outputPath = "daithang1111-all";// cmdline.getOptionValue(OUTPUT);
+    String outputPath = "daithang1111-egypt";// cmdline.getOptionValue(OUTPUT);
     int reduceTasks = 5;
     // cmdline.hasOption(NUM_REDUCERS) ? Integer.parseInt(cmdline
     // .getOptionValue(NUM_REDUCERS)) : 1;
