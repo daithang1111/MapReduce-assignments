@@ -56,14 +56,12 @@ store r into 'daithang1111-egypt-pig';
 
 
 
-
 Grading
 =======
 
-Everything looks correct and I was able to run your code without any
-problems. Great work!
+Everything looks great!
+Minor comment: filtering *before* grouping will make your script more efficient.
 
-Score: 35/35
+Score: 25/25
 
 -Jimmy
-
